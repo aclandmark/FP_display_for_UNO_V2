@@ -1,8 +1,8 @@
 # FP_display_for_UNO_V2
 
-An improvement on version 1, it uses a single ic rather than two, thr ATtiny1606.  
+An improvement on version 1, it uses a single IC rather than two, the ATtiny1606.  
 
-The ATtinyy 1606 has 20 pins which are used as follows:
+The ATtiny 1606 has 20 pins which are used as follows:
 
 Two for power
 
