@@ -8,8 +8,8 @@
 #include <util/delay.h>
 
 #define display_tick 390	
-#define comms_tick 27	
-#define half_comms_tick 13
+#define comms_tick	28					//27	
+#define half_comms_tick	14				//13
 
 
 #define wait_for_clock_tick \while (!(TCA0_SINGLE_INTFLAGS & TCA_SINGLE_CMP0EN_bm));\TCA0_SINGLE_INTFLAGS |= TCA_SINGLE_CMP0EN_bm;
@@ -26,15 +26,15 @@ void comms_transaction(void);
 void Display_driver(void);
 void Tx_transaction (char);
 char Rx_transaction (void);
-
+char RX_transaction (void);
 
 
 
 volatile char Tx_symbol, Rx_symbol, Rx_symbol_bkp;
 volatile char transaction_type;
 volatile char transaction_type = 1;
-volatile char transaction_counter = 0;
-
+volatile int transaction_counter = 0;
+char data[10];
 
 #include "../Resources/One_wire_transactions.c"
 
