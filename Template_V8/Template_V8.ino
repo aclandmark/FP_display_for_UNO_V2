@@ -95,11 +95,14 @@ counter = 0;
 while(1){
 One_wire_Tx_char = waitforkeypress();                             //Remove for test purposes
 wait_for_free_line;                                               //Remove for test purposes
-UART_Tx_1_wire();
-for(int m = 0; m <=5; m++){
+for(int m = 0; m <= 9; m++){UART_TX_1_wire();One_wire_Tx_char += 1;}
+
+for(int m = 0; m <= 9; m++){
 UART_Rx_1_wire();}sendString("\r\n");
 }
 
+//wait_for_free_line;  
+//while(1){UART_Rx_1_wire();}
 
 
 while(1);
