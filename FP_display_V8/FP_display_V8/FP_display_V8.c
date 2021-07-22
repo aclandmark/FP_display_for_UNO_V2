@@ -43,7 +43,7 @@ int main(void)
    display_digit = 0;											//Next digit to be refreshed or updated
     
    
-  Rx_symbol = 'A';
+  Rx_symbol = 'a';
    Rx_symbol_bkp = Rx_symbol;
    Start_TCA0();												//Display (2mS) tick rate
      while(1){
@@ -79,4 +79,4 @@ int main(void)
 	TCA0_SINGLE_CNT = 0;										//Initialise counter
 	TCA0_SINGLE_CMP0 = display_tick;							//2mS period for 2MHz clock
 	//TCA0_SINGLE_CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc | 1;		//Start clock with 2MHz clock
-	//TCA0_SINGLE_CTRLA = TCA_SINGLE_CLKSEL_DIV256_gc | 1;		//Start clock with 7.8125KHz clock (512mS tick)	TCA0_SINGLE_CTRLA = TCA_SINGLE_CLKSEL_DIV64_gc | 1;	TCA0_SINGLE_INTCTRL |= TCA_SINGLE_CMP0EN_bm;}				//Interrupt flag on compare match zero/*****************************************************************************************************************************/	void Display_driver(void){	PORTC.OUTTGL |= PIN0_bm;		//_delay_ms(250);	//PORTC.OUT &= ~PIN0_bm;	display_digit += 1;}				
+	//TCA0_SINGLE_CTRLA = TCA_SINGLE_CLKSEL_DIV256_gc | 1;		//Start clock with 7.8125KHz clock (512mS tick)	//TCA0_SINGLE_CTRLA = TCA_SINGLE_CLKSEL_DIV64_gc | 1;	TCA0_SINGLE_CTRLA = TCA_SINGLE_CLKSEL_DIV8_gc | 1;	TCA0_SINGLE_INTCTRL |= TCA_SINGLE_CMP0EN_bm;}				//Interrupt flag on compare match zero/*****************************************************************************************************************************/	void Display_driver(void){	PORTC.OUTTGL |= PIN0_bm;		//_delay_ms(250);	//PORTC.OUT &= ~PIN0_bm;	display_digit += 1;}				
