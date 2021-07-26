@@ -11,7 +11,7 @@
 #define comms_tick		140		//20K Baud rate (2.8MHz clock not 2MHz????)	500mS per transaction
 #define half_comms_tick	70		
 
-#define wait_for_clock_tick \\while (!(TCA0_SINGLE_INTFLAGS & TCA_SINGLE_CMP0EN_bm));\TCA0_SINGLE_INTFLAGS |= TCA_SINGLE_CMP0EN_bm;
+#define wait_for_clock_tick \while (!(TCA0_SINGLE_INTFLAGS & TCA_SINGLE_CMP0EN_bm));\TCA0_SINGLE_INTFLAGS |= TCA_SINGLE_CMP0EN_bm;
 
 #define inc_display_clock			TCA0_SINGLE_CMP0 += display_tick;
 #define inc_comms_clock				TCA0_SINGLE_CMP0 += comms_tick;
