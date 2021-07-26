@@ -100,6 +100,15 @@ sendHex(16, UART_Rx());
 Timer_T0_sub(T0_delay_200us);}}
 
 
+void read_out_calibration_bytes(void){				
+int start_add = 0x1120;
+for(int m = 0; m<=5; m++){
+UART_Tx(0x55);
+UART_Tx(LDS_from | word_address);
+UART_Tx(start_add++);
+UART_Tx(start_add >> 8);
+sendHex(16, UART_Rx());
+Timer_T0_sub(T0_delay_200us);}}
 
 
 
