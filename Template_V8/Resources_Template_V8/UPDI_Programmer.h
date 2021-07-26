@@ -358,6 +358,8 @@ if (set_up_NVM_prog())\
 sendString("\r\nSignature byte readout\t\t");\
 else {sendString("\r\nPOR to proceed!"); while(1);}\
 read_out_signature_bytes();\
+sendString("\r\nCalibration byte readout\t\t");\
+read_out_calibration_bytes();\
 newline();
 
 
