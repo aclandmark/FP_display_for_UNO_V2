@@ -4,10 +4,10 @@ volatile char One_wire_Rx_char, One_wire_Tx_char;
 volatile int One_wire_Rx_int;
 volatile char Tx_complete, Rx_complete;
 
-#define Tx_clock_1            20	//41
-#define Rx_clock_1            20	//41
-#define Start_clock_1         TCNT0 = 0;  TCCR0B = (1 << CS00) | (1 << CS01);									//TCCR0B = (1 << CS02);       //62.5KHz clock, 1.5K Baud rate
-#define Half_Rx_clock_1        10		//20
+#define Tx_clock_1     		100			//20K Baud rate				//92		//84		//100 		//142		//71	//80	//100
+#define Rx_clock_1     		100										//92	//84	//100		//142		//71	//80	//100
+#define Start_clock_1    	TCNT0 = 0;  TCCR0B = (1 << CS01);
+#define Half_Rx_clock_1 	50										//46	//42	//50		//70		//35	//40	//50
 
 #define wait_for_comms_tick \
 OCR0A +=  Rx_clock_1;\
