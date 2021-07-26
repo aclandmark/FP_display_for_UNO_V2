@@ -41,11 +41,13 @@ initialise_NVM_programming;
 sendString("Programming fuses\r\n");
 write_fuse (WDTCFG, 0x0);                             //Default value: WDT under program control
 write_fuse (BODCFG,0x0);                              //Default value: BOD dissabled
-write_fuse (OSCCFG, 0x7D);                            //Default value: 16MHz internal clock
+write_fuse (OSCCFG, 0x01);                            //Default value: 16MHz internal clock  0x7D
 write_fuse (SYSCFG0, 0xF7);                           //UPDI enabled, EEPROM preserved at chip erase
 write_fuse (SYSCFG1, 0xFD);                           //16mS SUT
 write_fuse (APPEND, data_blocks);                      //For Attiny 1606: Nothing reserved for text
 write_fuse (BOOTEND, 0x0);                            //Default value: No boot partition
+
+
 
 sendString("\r\nProgram flash with hex? -y- or AOK");
 if (waitforkeypress() == 'y')
