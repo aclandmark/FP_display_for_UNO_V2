@@ -9,16 +9,18 @@
 				
 		case 1: 
 		Rx_symbol = Rx_transaction();
-		if((unsigned char)Rx_symbol == 0xFF)Rx_symbol = Rx_symbol_bkp;
-		else{ Rx_symbol_bkp = Rx_symbol; data [transaction_counter++] = Rx_symbol;
-		if(transaction_counter == 10) {	
+		if((unsigned char)Rx_symbol == 0xFF);
+		else{ 
+			data [transaction_counter++] = Rx_symbol;
+		if(transaction_counter == 25) {	
 		transaction_type = 2; transaction_counter = 0;}}
 		break;
 		
 		case 2: 
 		Tx_symbol =	data [transaction_counter++] - 32;
 		Tx_transaction(Tx_symbol);
-		if(transaction_counter == 10){transaction_type = 1; transaction_counter = 0;}
+		if(transaction_counter == 25){transaction_type = 1; 
+			transaction_counter = 0; transaction_complete = 1;}
 		break;
 	}
 }
