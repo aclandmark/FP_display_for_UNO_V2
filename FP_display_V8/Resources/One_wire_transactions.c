@@ -4,26 +4,50 @@
 
 
 
-void comms_transaction (void){	
+void comms_transaction (void){	if (!(transaction_type))
+	{Rx_symbol = Rx_transaction();
+	if((unsigned char)Rx_symbol == 0xFF)return;
+	if (!(byte_counter)){byte_counter = 1; transaction_type = Rx_symbol;return;}}
+	
+	
 	switch (transaction_type){
-				
-		case 1: 
+		case 'A':																//Receive long number string
 		Rx_symbol = Rx_transaction();
-		if((unsigned char)Rx_symbol == 0xFF);
-		else{ 
-			data [transaction_counter++] = Rx_symbol;
-		if(transaction_counter == 25) {	
-		transaction_type = 2; transaction_counter = 0;}}
+		display_buffer[byte_counter - 1] = Rx_symbol;
+		byte_counter += 1;
+		if(byte_counter == 9)	//9
+		{transaction_complete = 1; byte_counter = 0; 
+		}
+		
 		break;
 		
-		case 2: 
-		Tx_symbol =	data [transaction_counter++] - 32;
-		Tx_transaction(Tx_symbol);
-		if(transaction_counter == 25){transaction_type = 1; 
-			transaction_counter = 0; transaction_complete = 1;}
+		case 'C':																//Receive long number
+		Rx_symbol = Rx_transaction();
+		Long_Num_from_UNO = (Long_Num_from_UNO << 8) | Rx_symbol; byte_counter += 1;
+		if (byte_counter == 5){transaction_complete = 1; byte_counter = 0;
+		}
+		
 		break;
-	}
+		
+		case 'E':																//Return long number string in binary
+		//Long_Num_to_UNO = 345678;
+		Tx_transaction(test_symbol++);
+		byte_counter += 1;
+		if(byte_counter == 5)
+		{transaction_complete = 1; byte_counter = 0;}
+		
+		/*byte_counter += 1;
+		switch(byte_counter){
+			case 2: Tx_transaction(Long_Num_to_UNO >> 24); break;
+			case 3: Tx_transaction(Long_Num_to_UNO >> 16); break;
+			case 4: Tx_transaction(Long_Num_to_UNO >> 8); break;
+			case 5: Tx_transaction(Long_Num_to_UNO); transaction_complete = 1; byte_counter = 0; break; }*/
+		
+		break;
+		
+		}
 }
+
 
 
 char Rx_transaction (void){
@@ -42,10 +66,6 @@ char Rx_transaction (void){
 		inc_comms_clock;}		wait_for_clock_tick;
 	PORTC.DIR &= ~PIN3_bm;}
 	
-		
-		
-		
-		
 		
 		
 		
