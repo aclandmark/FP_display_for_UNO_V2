@@ -28,14 +28,14 @@
 #define	seg_g 	PIN0_bm
 #define	DP		PIN2_bm
 
-#define	digit_0		PORTA.OUT |= PIN1_bm;
-#define	digit_1		PORTA.OUT |= PIN2_bm;
-#define	digit_2		PORTA.OUT |= PIN3_bm;
-#define	digit_3		PORTB.OUT |= PIN0_bm;
-#define	digit_4		PORTA.OUT |= PIN4_bm;
-#define	digit_5		PORTA.OUT |= PIN5_bm;
-#define	digit_6		PORTA.OUT |= PIN6_bm;
-#define	digit_7		PORTA.OUT |= PIN7_bm;
+#define	digit_7		PORTA.OUT |= PIN1_bm;
+#define	digit_6		PORTA.OUT |= PIN2_bm;
+#define	digit_5		PORTA.OUT |= PIN3_bm;
+#define	digit_4		PORTB.OUT |= PIN0_bm;
+#define	digit_3		PORTA.OUT |= PIN4_bm;
+#define	digit_2		PORTA.OUT |= PIN5_bm;
+#define	digit_1		PORTA.OUT |= PIN6_bm;
+#define	digit_0		PORTA.OUT |= PIN7_bm;
 
 
 //All ports are outputs
