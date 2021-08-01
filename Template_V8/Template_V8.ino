@@ -94,14 +94,72 @@ _delay_ms(1);
 DDRC &= ~(1 << DDC4);                                                 //Tri state   The default state
 counter = 0;
 
-while(1){
-One_wire_Tx_char = waitforkeypress();                             //Remove for test purposes
-//wait_for_free_line;                                               //NO LONGER NEEDED
-for(int m = 0; m <= 24; m++){UART_Tx_1_wire();One_wire_Tx_char += 1;}
 
-for(int m = 0; m <= 24; m++){
-UART_Rx_1_wire();}sendString("\r\n");
-}
+/*
+waitforkeypress();
+One_wire_Tx_char = 'E'; UART_Tx_1_wire();
+UART_Rx_1_wire();
+UART_Rx_1_wire();
+UART_Rx_1_wire();
+UART_Rx_1_wire();
+*/
+//waitforkeypress();
+
+
+
+
+char display_buffer[8], buffptr = 0;
+for(int m = 0; m <= 7; m++)display_buffer[m] = 0;
+
+for(int n = 0; n <= 7; n++){   //7                                                              //Send string entered at keyboard
+display_buffer[0] = waitforkeypress();
+One_wire_Tx_char = 'A'; UART_Tx_1_wire();
+for(int m = 0; m <= 7; m++){One_wire_Tx_char = display_buffer[m]; UART_Tx_1_wire();}  //7
+for (int p = 7; p >= 1; p--)display_buffer[p] = display_buffer[p - 1];}
+
+waitforkeypress();
+
+long Long_Num_to_UNO = 543210;                                                              //Send fixed binary number
+One_wire_Tx_char = 'C'; UART_Tx_1_wire();
+One_wire_Tx_char = Long_Num_to_UNO >> 24; UART_Tx_1_wire();
+One_wire_Tx_char = Long_Num_to_UNO >> 16; UART_Tx_1_wire();
+One_wire_Tx_char = Long_Num_to_UNO >> 8; UART_Tx_1_wire();
+One_wire_Tx_char = Long_Num_to_UNO; UART_Tx_1_wire();
+
+
+long Long_Num_from_UNO = 0;                                                                //Recover binary number
+char num_byte[4];
+One_wire_Tx_char = 'E'; UART_Tx_1_wire();
+for(int m = 0; m <= 3; m++){
+UART_Rx_1_wire(); num_byte[m] = One_wire_Rx_char;}
+
+Long_Num_from_UNO |= num_byte[0];
+Long_Num_from_UNO = Long_Num_from_UNO << 8;
+Long_Num_from_UNO |= num_byte[1];
+Long_Num_from_UNO = Long_Num_from_UNO << 8;
+Long_Num_from_UNO |= num_byte[2];
+Long_Num_from_UNO = Long_Num_from_UNO << 8;
+Long_Num_from_UNO |= num_byte[3];
+
+
+char test_buf[12];
+for (int m = 0; m <= 11; m++)test_buf[m] = 0;
+ltoa(Long_Num_from_UNO, test_buf, 10);
+for (int m = 0; m <= 11; m++)sendChar(test_buf[m]);
+
+
+
+waitforkeypress();
+Long_Num_to_UNO = Long_Num_from_UNO * 2;                                                  //Do arithmetic and display resuly
+One_wire_Tx_char = 'C'; UART_Tx_1_wire();
+One_wire_Tx_char = Long_Num_to_UNO >> 24; UART_Tx_1_wire();
+One_wire_Tx_char = Long_Num_to_UNO >> 16; UART_Tx_1_wire();
+One_wire_Tx_char = Long_Num_to_UNO >> 8; UART_Tx_1_wire();
+One_wire_Tx_char = Long_Num_to_UNO; UART_Tx_1_wire();
+
+
+
+
 
 while(1);}
 
