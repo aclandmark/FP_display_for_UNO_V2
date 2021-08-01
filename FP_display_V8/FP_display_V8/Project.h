@@ -6,6 +6,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include <stdlib.h>
 
 #define display_tick	4000	//2mS assuming a clock of 2.22MHz (OSCM20 generates 17.76MHz instead of 16MHz)	
 #define comms_tick		200	//111		//500mS per transaction
@@ -28,16 +29,18 @@ char Rx_transaction (void);
 void Char_definition(void);
 
 volatile char Tx_symbol, Rx_symbol, Rx_symbol_bkp;
-volatile char transaction_type;
-volatile char transaction_type = 1;
-volatile int transaction_counter = 0;
+volatile char transaction_type, transaction_complete;
+volatile int byte_counter;
+
 volatile int cmp0_bkp;
-volatile char cal_factor, transaction_complete;
-char data[30];
+volatile char cal_factor;
+volatile char test_symbol= 1;
+char data[10];
 
 char display_buffer[8];
+char temp_buffer[8];
 volatile int display_ptr;
-
+volatile long Long_Num_from_UNO, Long_Num_to_UNO;
 
 #include "../Resources/One_wire_transactions.c"
 #include "../Resources/Display_header_V2A.h"
