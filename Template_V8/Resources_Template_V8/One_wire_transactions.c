@@ -4,13 +4,13 @@ volatile char One_wire_mode;
 
 void UART_Tx_1_wire(void){
 One_wire_Rx_char = 0;
-Rx_complete = 0;
+Tx_complete = 0;
 One_wire_mode = 1;										//Rx_Tx mode
 PCICR |= 1 << PCIE1;                                          //set up IPC
 PCMSK1 |= 1 << PCINT12;
 sei();
-while(!(Rx_complete));
-if (One_wire_Rx_char)sendChar(One_wire_Rx_char);
+while(!(Tx_complete));
+//if (One_wire_Rx_char)sendChar(One_wire_Rx_char);
 cli();}
 
 
@@ -21,7 +21,7 @@ PCICR |= 1 << PCIE1;                                          //set up IPC
 PCMSK1 |= 1 << PCINT12;
 sei();
 while (!(One_wire_Rx_char));
-sendChar(One_wire_Rx_char);
+//sendChar(One_wire_Rx_char);
 cli();}
 
 
@@ -51,6 +51,7 @@ wait_for_comms_tick;
 
 DDRC &= ~(1 << PINC4);
 PORTC &= ~(1 << PORTC4);                             //Restore Tri
+Tx_complete = 1;////////////////////////////////////////////////////
 TCCR0B = 0;}
 
 if(One_wire_mode == 2){								//Receive character
