@@ -1,135 +1,89 @@
 
-void sendHex(char, unsigned int);
-void sendCharasASKI(char, unsigned char); 
-void sendsignedHex (int);
-void my_utoa(char, unsigned int, char*, char);
-void my_chartoa(char, unsigned char, char*);
-int my_atoi (char *);
-int my_atoi_with_sign (char*);
-char non_numeric_char (char);
-int askiX2_to_hex (char*);
-int askiX4_to_hex_V2 (char*);
 
-
-
-/**********************************************************************************************/
-void sendHex(char radix, unsigned int Hex){ char print_out_string[6];
-my_utoa(radix, Hex, print_out_string, 'Z'); 
-NumericString_to_PC_with_pause(print_out_string);sendString(" ");}							//include leading zeros
-
-
-
-/**********************************************************************************************/
-void sendCharasASKI(char radix, unsigned char CHR){ char print_out_string[4];
-my_chartoa(radix, CHR, print_out_string); 
-NumericString_to_PC_with_pause(print_out_string);sendString(" ");}
-
-
-
-/**********************************************************************************************/
-void sendsignedHex (int Hex){
-char print_out_string[6];
-char sign_char = '+';
-if (Hex & 0x8000) {Hex = ~Hex + 1; sign_char = '-';}
-my_utoa(10, Hex, print_out_string, 'N'); 												//Exclude leading zeros
-if (sign_char == '-')
-{sendChar('-'); NumericString_to_PC_with_pause(print_out_string);sendString("  ");}
-else {sendChar(' '); NumericString_to_PC_with_pause(print_out_string);sendString("  ");}}
-
-
-
-/**********************************************************************************************/
-void my_utoa(char radix, unsigned int n, char s[], char mode){							//unsigned to askii
-unsigned char i;																		//Generates string in reverse order
-i=0;
-do{
-s[i] = n % radix;
-if (s[i] < 10) s[i]+= '0';
-else s[i] += '7';
-i++;
-}while((n/=radix)>0);
-if ((i < 4) && (mode == 'Z')){while(i < 4) {s[i++] = '0';}}	
-s[i] = '\0';}
-
-
-
-/**********************************************************************************************/
-void my_chartoa(char radix, unsigned char n, char s[]){								//char to askii
-unsigned char i;																		//Generates string in reverse order
-i=0; 		
-do{
-s[i] = n % radix;
-if (s[i] < 10) s[i]+= '0';
-else s[i] += '7';
-i++;
-}while((n/=radix)>0);
-s[i] = '\0';}
-
-
-
-/**********************************************************************************************/
-int my_atoi (char s[]){ int i,n;														//askii to integer
-n=0;
-for(i=0; s[i] >= '0' && s[i] <= '9'; ++i)
-n= 10*n + (s[i] - '0');
-return n;}
+char receiveChar(void);
+char isCharavailable (int);
+char waitforkeypress(void);
+char wait_for_return_key(void);
+char decimal_digit (char);
+void UART_Rx_1_wire(void);
+void UART_Tx_1_wire(void);
 
 
 
 
-/**********************************************************************************************/
-int my_atoi_with_sign (char s[]){ int i,n;												//askii to integer with sign
-n=0;
-switch (s[0]){
-case '-' : 
-for(i=1; s[i] >= '0' && s[i] <= '9'; ++i)
-n= 10*n + (s[i] - '0'); n = 0-n; break;
-
-case '+' : 
-for(i=1; s[i] >= '0' && s[i] <= '9'; ++i)
-n= 10*n + (s[i] - '0'); break;
-
-default:
-for(i=0; s[i] >= '0' && s[i] <= '9'; ++i)
-n= 10*n + (s[i] - '0'); break;}
-return n;}
 
 
+long Int_from_KBD(void){                                            //Acquires an integer string from the keyboard and returns the binary equivalent
+char keypress;
+long I_number;
+char SREG_BKP;
+
+SREG_BKP = SREG;
+sei();
+
+cr_keypress = 0;                                                        //Set to one when carriage return keypress terminates the string
+for(int n = 0; n<=8; n++) display_buffer[n] = 0;                     //Clear the buffer used for the string
+
+while(1){
+keypress = waitforkeypress();
+if ((!(decimal_digit(keypress)))
+&& (keypress != '-'))continue;                            				//Ignore keypress if it is not OK
+display_buffer[0] = keypress;
+break;}
+ 
+Send_int_num_string;
+while(1){
+if ((keypress = wait_for_return_key())  =='\r')break;                 //Detect return key press (i.e \r or\r\n)
+if ((decimal_digit(keypress)) || (keypress == '\b')\
+ || (keypress == '-'))
+
+{if (keypress == '\b'){                         						//Backspace key
+for (int n = 0; n <= 7; n++)
+display_buffer[n] = display_buffer[n + 1];}
+else
+{for(int n = 8; n>=1; n--)                                            //Shift display for each new keypress
+display_buffer[n] = display_buffer[n-1];
+display_buffer[0] = keypress;  }                                      //Add new keypress           
+
+Send_int_num_string;}}                                                  //Update display includes "cr_keypress"                                                 
+cr_keypress = 1;                                                        //End of string; return key press detected
+
+Send_int_num_string;
+cr_keypress = 0;
 
 
-/**********************************************************************************************/
-char non_numeric_char (char data){														//test for a numeric char
-if (((data > '9') && (data < 'A')) || (data < '0') || (data > 'F'))
-return 1;
-else return 0;}
+
+
+One_wire_Tx_char = 'E'; UART_Tx_1_wire();
+for(int m = 0; m <= 3; m++){
+UART_Rx_1_wire(); num_byte[m] = One_wire_Rx_char;}
+
+for(int m = 0; m <= 3; m++){
+Long_Num_from_UNO = Long_Num_from_UNO << 8;
+Long_Num_from_UNO |= num_byte[m];}
 
 
 
-/**********************************************************************************************/
-int askiX2_to_hex (char a[]) {															//convert askii binary char
-int hex;
-hex=0;
-if (non_numeric_char(a[0])) return 0;
-if (non_numeric_char(a[1])) return 0;
 
-a[0] = a[0] - '0'; if (a[0] >=17)a[0] = a[0]-7;
-hex = hex + (a[0]<<4);
-a[1] = a[1] - '0'; if (a[1] >=17)a[1] = a[1]-7;
-hex = hex + a[1];
-return hex;}
+SREG = SREG_BKP;
+return Long_Num_from_UNO;}
 
 
 
-/**********************************************************************************************/
-int askiX4_to_hex_V2 ( char a[])														//convert askii to binary integer																			
-{int m, n;  unsigned int hex;
-hex=0;n=3;
-for(m=0; m<=3; m++){ 
-if (a[m]=='\0') {  hex = hex >> (4*(n+1)); return hex;}
-if(non_numeric_char(a[m])) return 0;
-a[m] = a[m] - '0'; if (a[m] >=17)a[m] = a[m]-7;
-hex = hex + (a[m] << (4*n)); n--;}
-return hex;}
+/************************************************************************************************************/
+char wait_for_return_key(void){  
+char keypress,temp;
+keypress = waitforkeypress();
+if((keypress == '\r') || (keypress == '\n')){
+if (isCharavailable(1)){temp = receiveChar();}keypress = '\r';}
+return keypress;}
+
+
+
+/************************************************************************************************************/
+char decimal_digit (char data){
+if (((data > '9') || (data < '0')) )return 0;
+else return 1;}
 
 
 
