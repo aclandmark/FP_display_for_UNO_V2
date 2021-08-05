@@ -1,31 +1,32 @@
 
  
 #define device_type 1606
-//#define text_bytes  2048
-#define text_bytes  0                                     //No space reserved for text
-
 
 
 #include "Resources_Template_V9.h"
+#include "Resources_UPDI_programmer.h"
+
 char mode = 0;
 
 //ALL ports except the programming port are WPU, the programming port is tri-tate
 
 int main (void){ 
 char keypress, line_counter;
+long int_num;
 
-setup_328_HW;                                           //see "Resources\ATMEGA_Programmer.h"
+setup_328_HW;                                           //see "Resources\ATMEGA_Programme
+PORTC &= (~(1 << PORTC4));                               //One way comms for template requires port to be set to Tri state   
 P_counter = 0;                                          //Used to check parity of data received from UPDI
+
+
 User_prompt;
 
-sendString("\r\nPress 'a' to program target or AOK to run taget code\r\n");
-if(waitforkeypress() == 'a') 
+/*************************************************/
 
-{sendString("\r\nUNO_UPDI_Programer_V1a (also works on an Atmega 328 clocked at 8MHz)\r\n\r\n");
-sendString ("Press any key to start\r\n\r\n");
-waitforkeypress();
+sendString("\r\nPress 'a' to program target or AOK to run taget code\r\n\r\n");
+if(waitforkeypress() == 'a'){
 
-/********************************Programmer target connection sequence************************************/
+//********************************Programmer target connection sequence************************************
 Timer_T1_sub_with_interrupt(T1_delay_100ms);
 sei();
 contact_target;
@@ -44,78 +45,42 @@ write_fuse (BODCFG,0x0);                              //Default value: BOD dissa
 write_fuse (OSCCFG, 0x01);                            //Default value: 16MHz internal clock  0x7D
 write_fuse (SYSCFG0, 0xF7);                           //UPDI enabled, EEPROM preserved at chip erase
 write_fuse (SYSCFG1, 0xFD);                           //16mS SUT
-write_fuse (APPEND, data_blocks);                      //For Attiny 1606: Nothing reserved for text
-write_fuse (BOOTEND, 0x0);                            //Default value: No boot partition
-
+write_fuse (APPEND, 0);
+write_fuse (BOOTEND, 0);
 
 
 sendString("\r\nProgram flash with hex? -y- or AOK");
 if (waitforkeypress() == 'y')
 { mode = 'H';
-  sendString("\r\nSend file  ");
-  Program_Flash_Hex();
-}
+sendString("\r\nSend file  ");
+Program_Flash_Hex();}
+
 Verify_Flash_Hex();
 sendString("\r\nFuses:\tWDT, BOD, OSC,SYS0\tSYS1, APPEND, BOOTEND\r\n\t");
 read_out_fuses();
 
-sendString("\r\n\r\nProgram flash with text? -y- or AOK");
-if (waitforkeypress() == 'y')
-{ mode = 'T';
-  Program_Flash_Text();}
-
-sendString("\r\n\r\nUnlocking device");
-write_fuse (0x128A, 0xC5);                              //Device unlocked
-sendString("\r\n-y- to Lock device or AOK");
-if (waitforkeypress() == 'y')
-{write_fuse (0x128A, 0x0);
-sendString("\r\nDevice locked\r\n");}
-else sendString("\r\nDevice unlocked\r\n");
-
-UPDI_reset;
-
-sendString("Sesion terminated\r\n\r\n");
+UPDI_reset; 
 Dissable_UPDI_sesion;}
+
+/*************************************************/
 
 /************Code in this section is test code.  It is not part of the UPDI programmer******************
 ******I*****Its purpose is to relay signals from the UNO UART port to the ATtiny UART ****************
 ******************so that the operation of the progammer can be tested easily*************************/
 
 
-sendString("\r\nRun trial application? -y- or AOK (POR may be required)\r\n");
+sendString("\r\nRun trial application? -y- or AOK (POR may be required)\r\n\r\n");
 if(waitforkeypress() == 'y'){
-PORTC &= (~(1 << PORTC4));                                            //Tri state   The default state
+//PORTC &= (~(1 << PORTC4));                                                              //Tri state   The default state
 sendString("Enter numbers from KBD (terminate in cr)\r\n");
 
-
-long Long_Num_to_UNO;
-long Long_Num_from_UNO = 0;                                                                //Recover binary number
-unsigned char num_byte[4];
-
-
 while(1){
-
-Int_from_KBD();
-
-One_wire_Tx_char = 'E'; UART_Tx_1_wire();
-for(int m = 0; m <= 3; m++){
-UART_Rx_1_wire(); num_byte[m] = One_wire_Rx_char;}
-
-for(int m = 0; m <= 3; m++){
-Long_Num_from_UNO = Long_Num_from_UNO << 8;
-Long_Num_from_UNO |= num_byte[m];}
-
-
-
+int_num = Int_from_KBD();
 sendString("AK to do arithmetic\r\n");
 waitforkeypress();
-Long_Num_to_UNO = Long_Num_from_UNO * 2;                                                  //Do arithmetic and display resuly
-One_wire_Tx_char = 'C'; UART_Tx_1_wire();
-for(int m = 0; m <= 3; m++){
-One_wire_Tx_char = Long_Num_to_UNO >> (8 * (3 - m)); UART_Tx_1_wire();}
-
-sendString("New number?\r\n");
-}
+Long_Num_to_UNO = Long_Num_from_UNO * 2;
+send_int_num(Long_Num_to_UNO);
+sendString("New number?\r\n");}
 
 while(1);}
 
@@ -170,8 +135,8 @@ unsigned char UART_Rx(void){
 
 
 /*********************************************************************************/
-ISR(USART_RX_vect){if (mode =='H')upload_hex();
-                    if (mode =='T')upload_text();}
+ISR(USART_RX_vect){if (mode =='H')upload_hex();}
+//                    if (mode =='T')upload_text();}
                     
 ISR(TIMER1_OVF_vect) {
   if(!(T1OVFM)){UPDI_timeout = 1;TCCR1B = 0;}
@@ -186,81 +151,3 @@ ISR(TIMER1_OVF_vect) {
 
  /**********************************************************************************************************************/
  /***************************************************************************************************************************************/
-void Int_from_KBD(void){                                            //Acquires an integer string from the keyboard and returns the binary equivalent
-char keypress;
-long I_number;
-char SREG_BKP;
-
-SREG_BKP = SREG;
-
-//sendChar('Z');
-
-sei();
-
-cr_keypress = 0;                                                        //Set to one when carriage return keypress terminates the string
-for(int n = 0; n<=8; n++) display_buffer[n] = 0;                     //Clear the buffer used for the string
-
-while(1){
-keypress = waitforkeypress();
-if ((!(decimal_digit(keypress)))
-&& (keypress != '-'))continue;                            //Ignore keypress if it is not OK
-display_buffer[0] = keypress;
-break;}
-//sendChar(keypress);
-
-//int_string_to_display();//////////////////////////////////////////////////////////////////// 
-One_wire_Tx_char = 'A'; UART_Tx_1_wire();
-for(int m = 0; m <= 7; m++){One_wire_Tx_char = display_buffer[m]; UART_Tx_1_wire();}
-One_wire_Tx_char = cr_keypress;  UART_Tx_1_wire();
-
-while(1){
-if ((keypress = wait_for_return_key())  =='\r')break;                 //Detect return key press (i.e \r or\r\n)
-if ((decimal_digit(keypress)) || (keypress == '\b')\
- || (keypress == '-'))
-
-{if (keypress == '\b'){                         //Backspace key
-for (int n = 0; n <= 7; n++)
-display_buffer[n] = display_buffer[n + 1];}
-else
-{for(int n = 8; n>=1; n--)                                            //Shift display for each new keypress
-display_buffer[n] = display_buffer[n-1];
-display_buffer[0] = keypress;  }                                               //Add new keypress           
-
-//sendChar(display_buffer[0]);
-
-//int_string_to_display();////////////////////////////////////////////////////////////////////////////////////////////////
-One_wire_Tx_char = 'A'; UART_Tx_1_wire();
-for(int m = 0; m <= 7; m++){One_wire_Tx_char = display_buffer[m]; UART_Tx_1_wire();}
-One_wire_Tx_char = cr_keypress;  UART_Tx_1_wire();
- }}                                                                     //Update display includes "cr_keypress"                                                 
-cr_keypress = 1;                                                        //End of string; return key press detected
-
-//int_string_to_display()//////////////////////////////////////////////////////////////////////////////////
-One_wire_Tx_char = 'A'; UART_Tx_1_wire();
-for(int m = 0; m <= 7; m++){One_wire_Tx_char = display_buffer[m]; UART_Tx_1_wire();}
-One_wire_Tx_char = cr_keypress;  UART_Tx_1_wire();
-
-cr_keypress = 0;
-SREG = SREG_BKP;
-
-/*TWCR = (1 << TWEA) | (1 << TWEN) | (1 << TWINT);                      //Activate TWI and wait for contact from display pcb 
-while (!(TWCR & (1 << TWINT)));
-I_number =  byte(receive_byte_with_Ack());                              //Build up the number as each byte is received
-I_number = (I_number << 8) + byte(receive_byte_with_Ack());
-I_number = (I_number << 8) + byte(receive_byte_with_Ack());
-I_number = (I_number << 8) + byte(receive_byte_with_Nack());
-TWCR = (1 << TWINT);*/
-//return I_number;
-}
-
-
-char wait_for_return_key(void){  
-char keypress,temp;
-keypress = waitforkeypress();
-if((keypress == '\r') || (keypress == '\n')){
-if (isCharavailable(1)){temp = receiveChar();}keypress = '\r';}
-return keypress;}
-
-char decimal_digit (char data){
-if (((data > '9') || (data < '0')) )return 0;
-else return 1;}
