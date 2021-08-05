@@ -1,5 +1,15 @@
 
+
+void UART_Tx_1_wire(void);
+
 volatile char One_wire_mode;
+
+
+void send_int_num(long num){
+One_wire_Tx_char = 'C'; UART_Tx_1_wire();
+for(int m = 0; m <= 3; m++){
+One_wire_Tx_char = Long_Num_to_UNO >> (8 * (3 - m)); UART_Tx_1_wire();}}
+
 
 
 void UART_Tx_1_wire(void){
@@ -10,7 +20,6 @@ PCICR |= 1 << PCIE1;                                          //set up IPC
 PCMSK1 |= 1 << PCINT12;
 sei();
 while(!(Tx_complete));
-//if (One_wire_Rx_char)sendChar(One_wire_Rx_char);
 cli();}
 
 
@@ -21,8 +30,6 @@ One_wire_mode = 2;											//Rx_Tx mode
 PCICR |= 1 << PCIE1;                                          //set up IPC
 PCMSK1 |= 1 << PCINT12;
 sei();
-//while (!(One_wire_Rx_char));///////////////////////////////////////////////////////
-//sendChar(One_wire_Rx_char);
 while (!(Rx_complete));
 cli();}
 
@@ -53,7 +60,7 @@ wait_for_comms_tick;
 
 DDRC &= ~(1 << PINC4);
 PORTC &= ~(1 << PORTC4);                             //Restore Tri
-Tx_complete = 1;////////////////////////////////////////////////////
+Tx_complete = 1;
 TCCR0B = 0;}
 
 if(One_wire_mode == 2){								//Receive character
