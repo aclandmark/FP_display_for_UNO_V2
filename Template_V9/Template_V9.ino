@@ -1,7 +1,7 @@
 
  
 #define device_type 1606
-
+//long Int_from_KBD(void);
 
 #include "Resources_Template_V9.h"
 #include "Resources_UPDI_programmer.h"
@@ -13,6 +13,12 @@ char mode = 0;
 int main (void){ 
 char keypress, line_counter;
 long int_num;
+float FPN;
+float test = 2.0;
+char FP_string[12];
+
+
+
 
 setup_328_HW;                                           //see "Resources\ATMEGA_Programme
 PORTC &= (~(1 << PORTC4));                               //One way comms for template requires port to be set to Tri state   
@@ -72,17 +78,32 @@ Dissable_UPDI_sesion;}
 sendString("\r\nRun trial application? -y- or AOK (POR may be required)\r\n\r\n");
 if(waitforkeypress() == 'y'){
 //PORTC &= (~(1 << PORTC4));                                                              //Tri state   The default state
-sendString("Enter numbers from KBD (terminate in cr)\r\n");
+
 
 while(1){
-int_num = Int_from_KBD();
+User_prompt_template;
+
+if (User_response =='i'){
+sendString("Enter integer from KBD (terminate in cr)\r\n");
+
+while (int_num = Int_from_KBD()){
 sendString("AK to do arithmetic\r\n");
 waitforkeypress();
 Long_Num_to_UNO = Long_Num_from_UNO * 2;
 send_int_num(Long_Num_to_UNO);
-sendString("New number?\r\n");}
+sendString("New number?\r\n");}}
 
-while(1);}
+if (User_response =='f'){
+ sendString("Enter FPN from KBD (terminate in cr)\r\n"); 
+ FPN =  Float_from_KBD();
+ waitforkeypress();
+ FPN = FPN * test;
+send_float_num(FPN);
+  ftoaL(FPN, FP_string);
+for(int m = 0; m <=11; m++)if(FP_string[m])sendChar(FP_string[m]);
+  
+  }
+}}
 
 /**********************************End to test code section*********************************************/
 SW_reset;
@@ -94,6 +115,76 @@ return 1;}
 /*
 Programmer subroutiness
  */
+
+/***************************************************************************************************************************************/
+void ftoaL(float Fnum, char FP_string[]){
+  int afterpoint = 0;
+  long ipart, Fnum_int;
+  char sign = '+';
+  signed char expt;
+  
+  if (Fnum < 0){sign = '-'; Fnum *= (-1);}                  //Convert negative numbers to positive ones and set the sign character
+  
+  for(int m = 0; m <= 15; m++) FP_string[m] = 0;                //Clear the floating point array
+  
+  Fnum_int = (long)Fnum;                            //Obtain integer part of the number
+  
+  if (Fnum_int < 10)afterpoint = 5;                     //Number of decimal places is matched to display length
+  if ((Fnum_int >= 10) && (Fnum_int < 100))afterpoint = 4;
+  if ((Fnum_int >= 100) && (Fnum_int < 1000))afterpoint = 3;
+  if ((Fnum_int >= 1000) && (Fnum_int < 10000))afterpoint = 2;
+  
+  expt = 0;                                 //Convert very large and small numbers to scientific form
+  if (Fnum  >= 10000) {while (Fnum >= 10)
+  {Fnum /= 10; expt += 1;}afterpoint = 5;}
+  
+  if(Fnum < 0.01) {while (Fnum < 1){Fnum *= 10; expt -= 1;}}
+  
+                                        //FP to askii routines taken from "https://www.geeksforgeeks.org/convert-floating-point-number-string/"
+  ipart = (long)Fnum;                             //Obtain integer part of FP number
+  float fpart = Fnum - (float)ipart;                      //Obtain floating part
+  long i = longToStr(ipart, FP_string, 0);                  //Convert integer part to string
+
+  if (afterpoint != 0){                           //Add Decimal part to the string
+    FP_string[i] = '.';
+    fpart = fpart * pow(10,afterpoint);
+  longToStr((long)fpart, FP_string + i + 1, afterpoint);}
+
+ 
+  //expt = Format_for_Display(FP_string, sign, expt);
+}
+
+
+
+/***************************************************************************************************************************************/
+long longToStr(long x, char str[], int d)
+{
+  int i = 0;
+  while (x)
+  {   str[i++] = (x%10) + '0';
+  x = x/10; }
+  
+  while (i < d)
+  str[i++] = '0';
+  reverse(str, i);
+  str[i] = '\0';
+return i; }
+
+
+/***************************************************************************************************************************************/
+void reverse(char *str, int len)
+{
+  int i=0, j=len-1, temp;
+  while (i<j)
+  {   temp = str[i];
+    str[i] = str[j];
+    str[j] = temp;
+  i++; j--; }}
+
+  
+
+
+
 
 /*******************************************************************************************************************************/
 void UART_Tx(unsigned int data_byte_T){               //starts Hi Z
