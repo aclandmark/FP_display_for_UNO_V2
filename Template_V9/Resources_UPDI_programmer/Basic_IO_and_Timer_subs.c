@@ -130,7 +130,7 @@ char receiveChar(void)
 /**********************************************************************************************/
 char isCharavailable (int m){int n = 0;		
 while (!(UCSR0A & (1 << RXC0))){n++;
-if (n>4000) {m--;n = 0;}if (m == 0)return 0;}
+if (n>8000) {m--;n = 0;}if (m == 0)return 0;}
 return 1;}
 
 
