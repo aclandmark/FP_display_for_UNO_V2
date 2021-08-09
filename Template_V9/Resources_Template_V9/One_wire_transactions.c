@@ -1,3 +1,5 @@
+void sendChar(char);
+void sendString(const char*);
 
 
 void UART_Tx_1_wire(void);
@@ -9,6 +11,28 @@ void send_int_num(long num){
 One_wire_Tx_char = 'C'; UART_Tx_1_wire();
 for(int m = 0; m <= 3; m++){
 One_wire_Tx_char = Long_Num_to_UNO >> (8 * (3 - m)); UART_Tx_1_wire();}}
+
+
+
+void send_float_num(float FP_num){
+	//unsigned long num_LF;
+	char * Char_ptr;
+	//char num;
+	//num_LF = * (unsigned long * )&FP_num;
+	Char_ptr = (char*)&FP_num;
+	
+	One_wire_Tx_char = 'D'; UART_Tx_1_wire();
+	
+	
+	for(int m = 0; m <= 3; m++){
+	One_wire_Tx_char = *Char_ptr;		UART_Tx_1_wire();				// 
+	//for(int m = 0; m <= 7; m++){
+	//if (One_wire_Tx_char & 1 << (7-m))sendChar('1'); else sendChar('0');}
+	Char_ptr += 1;
+	}}
+	
+	
+
 
 
 
