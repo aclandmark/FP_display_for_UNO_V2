@@ -10,14 +10,15 @@
 
 
 
-
-
-
+volatile char busy_flag;
 volatile char TCA0_counter;
 
 
 int main(void)
-{	char cal_factor;
+{	
+	
+	
+	char cal_factor;
 	char null_bit_counter;
 	
 	CPU_CCP = 0xD8;
@@ -35,73 +36,71 @@ int main(void)
    PORTC.DIR &= ~PIN3_bm;										//Configure comm port as input
    PORTC.OUT &= ~(PIN3_bm);										//I/O pin low when configured as output
    PORTC.PIN3CTRL |= PORT_PULLUPEN_bm;							//Pull-up enabled
-  ////////////////// while (PORTC.IN & (PIN3_bm));								//Wait for low pulse from UNO
- /////////////////// while (!(PORTC.IN & (PIN3_bm)));								//Wait for end of pulse
-   
-   data_byte_ptr = 0;
-   cr_keypress = 0;
-   byte_counter = 0;
- transaction_complete = 0;
- transaction_type = 0;
-  TCA0_counter = 0;
+    
+   busy_flag = 0;												//Data procesing in progress: Do not poll UNO
+   data_byte_ptr = 0;											//Points to next FPN/long byte to be transfered to the UNO
+   cr_keypress = 0;												//Set to 1 when user presses carriage return 
+	byte_counter = 0;											//Counts bytes sent to or received from UNO
+	transaction_complete = 0;										//Set to 1 when a data transfer is complete
+ transaction_type = 0;											//Data/string transfer to/from UNO 
+  TCA0_counter = 0;												//Counts TCAO interrupts
    Start_TCA0();												//Display (2mS) tick rate
     
 	sei();
 	
 	while(1){
-		while(!(transaction_complete));
+		while(!(transaction_complete));							//Wait here for requests from the UNO
 		transaction_complete = 0;
+		busy_flag = 1;											//Do not contact UNO until data processing is complete
 		
-	switch (transaction_type){
+	switch (transaction_type){									//Transaction complete: Process the data
 		
-		case 'A':															//Convert string from UNO to binary number
-		transaction_type = 0;
-		if(cr_keypress == 1){
-		
-		for(int m = 0; m <= 7; m++)temp_buffer[m]=0;
-		null_bit_counter = 0;
-		for(int m = 0; m <= 7; m++){if(!(display_buffer[7-m]))null_bit_counter += 1; else break;}
-		for(int m = 0; m <= 7-null_bit_counter; m++)
-		temp_buffer[m] = display_buffer[7-null_bit_counter - m];
-		//transaction_type = 0;
-		
-		//if(cr_keypress == 1)
-		//{
-		cr_keypress = 0;
-		Long_Num_to_UNO = atol(temp_buffer);		//3579;//
-		for(int m = 0; m <= 3; m++)data_byte[m] = Long_Num_to_UNO >> (8*(3-m));		//= m+3;//
-		/*data_byte[0] = 0;
-		data_byte[1] = 4;
-		data_byte[2] = 5;
-		data_byte[3] = 6;*/
-		
-		
-		
-		}
-		
-		
-		break;
-		
-		
-		case 'C':															//Convert binary from UNO to string
-		for(int m = 0; m <= 7; m++){temp_buffer[m] = 0;display_buffer[m] = 0;}
-		ltoa(Long_Num_from_UNO, temp_buffer, 10);
-		
-		null_bit_counter = 0;
-		for(int m = 0; m <= 7; m++){if(!(temp_buffer[7-m]))null_bit_counter += 1; else break;}
-		for(int m = 0; m <= 7-null_bit_counter; m++)
-		display_buffer[m] = temp_buffer[7-null_bit_counter - m];
-		transaction_type = 0;
-	
+	case 'A':													//If "cr" detected convert string from UNO to long number
+	if(cr_keypress == 1){
+	cr_keypress = 0;
+	display_buffer2temp;										//Reverse string prior to conversion to binary
+	Long_Num_to_UNO = atol(temp_buffer);	
+	for(int m = 0; m <= 3; m++)
+	data_byte[m] = Long_Num_to_UNO >> (8*(3-m));}				//Split long number into 4 bytes for re-transmission
 	break;
+		
+	case 'B':													//If "cr" detected convert string from UNO to float
+	if(cr_keypress == 1){
+	cr_keypress = 0;
+	display_buffer2temp;
+	Float_Num_to_UNO = atof(temp_buffer);
+						
+	char_ptr = (char*)&Float_Num_to_UNO;						//Split the number into bytes ready for return to the UNO
+	for (int m = 0; m <= 3; m++)
+	{data_byte[m] = *char_ptr;
+	char_ptr += 1;}
+	}break;
+		
+		
+	case 'C':													//Convert long from UNO to string
+	clear_display_buffer;
+	clear_temp_buffer;
+	ltoa(Long_Num_from_UNO, temp_buffer, 10);
+	temp2display_buffer;	
+	break;
+			
+	case 'D': 													//Convert float from UNO to string
+	Float_Num_from_UNO  = *float_ptr_2;
+	ftoaL(Float_Num_from_UNO);
+	break;
+		
+	case 'E':													//Return binary number (long or float) to UNO
+	for(int m = 0; m <= 7; m++)
+	temp_buffer[m] = display_buffer[m];							//Flash display
+	clear_display_buffer;
+	_delay_ms(100);
+	for(int m = 0; m <= 7; m++)
+	display_buffer[m] = temp_buffer[m];
+	break;}
 	
-	case 'E':transaction_type = 0;break;
 	
-	
-	}
-	
-	
-	
+	transaction_type = 0;
+	busy_flag = 0;
 	
 	
 	}
@@ -130,7 +129,7 @@ int main(void)
 	TCA0_SINGLE_CNT = 0;										//Initialise counter
 	TCA0_SINGLE_CMP0 = display_tick;							//2mS period for 2MHz clock
 	TCA0_SINGLE_CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc | 1;			//Start clock with 2MHz clock
-	TCA0_SINGLE_INTCTRL |= TCA_SINGLE_CMP0EN_bm;}				//Interrupt flag on compare match zero/*****************************************************************************************************************************/	void Display_driver(void){	//PORTC.OUTTGL |= PIN0_bm;	//display_digit += 1;		//display_ptr++;  display_ptr = display_ptr%7;	clear_digits; clear_display;		switch(display_ptr){	case 0: digit_0; break;		case 1: digit_1; break;	case 2: digit_2; break;	case 3: digit_3; break;	case 4: digit_4; break;	case 5: digit_5; break;	case 6: digit_6; break;	case 7: digit_7; break;}	Char_definition();	display_ptr += 1;  //display_ptr = display_ptr%7;	if(display_ptr == 8)display_ptr = 0;	}				ISR (TCA0_CMP0_vect){											//Tx works but not Rx	TCA0_SINGLE_INTFLAGS |= TCA_SINGLE_CMP0EN_bm;	TCA0_counter += 1;	if (TCA0_counter <= 8)	//7		{Display_driver();	inc_display_clock; return;}		cmp0_bkp = TCA0_SINGLE_CMP0 + display_tick;	inc_comms_clock;	PORTC.DIR |= PIN3_bm;										//Output low: Start bit	comms_transaction();	TCA0_SINGLE_CMP0 = cmp0_bkp;	TCA0_counter = 0;}										void Char_definition()
+	TCA0_SINGLE_INTCTRL |= TCA_SINGLE_CMP0EN_bm;}				//Interrupt flag on compare match zero/*****************************************************************************************************************************/	void Display_driver(void){		clear_digits; clear_display;	switch(display_ptr){	case 0: digit_0; break;		case 1: digit_1; break;	case 2: digit_2; break;	case 3: digit_3; break;	case 4: digit_4; break;	case 5: digit_5; break;	case 6: digit_6; break;	case 7: digit_7; break;}	Char_definition();	display_ptr += 1; 	if(display_ptr == 8)display_ptr = 0;}				ISR (TCA0_CMP0_vect){											//Tx works but not Rx	TCA0_SINGLE_INTFLAGS |= TCA_SINGLE_CMP0EN_bm;	TCA0_counter += 1;	if (TCA0_counter <= 8)		{Display_driver();	inc_display_clock; return;}		cmp0_bkp = TCA0_SINGLE_CMP0 + display_tick;	inc_comms_clock;	PORTC.DIR |= PIN3_bm;										//Output low: Start bit	if (!(busy_flag))comms_transaction();	TCA0_SINGLE_CMP0 = cmp0_bkp;	TCA0_counter = 0;}										void Char_definition()
 		{switch (display_buffer[display_ptr]){
 			case '0': zero; break;
 			case '1': one; break;
@@ -141,4 +140,19 @@ int main(void)
 			case '6': six; break;
 			case '7': seven; break;
 			case '8': eight; break;
-			case '9': nine; break;}} 
+			case '9': nine; break;
+			case '-': minus; break;
+			
+			case 'E': case 'e': exponent; break;
+			case ('0' | 0x80): zero_point; break;
+			case ('1' | 0x80): one_point; break;
+			case ('2' | 0x80): two_point; break;
+			case ('3' | 0x80): three_point; break;
+			case ('4' | 0x80): four_point; break;
+			case ('5' | 0x80): five_point; break;
+			case ('6' | 0x80): six_point; break;
+			case ('7' | 0x80): seven_point; break;
+			case ('8' | 0x80): eight_point; break;
+			case ('9' | 0x80): nine_point; break;
+			case ('-' | 0x80): minus_point; break;}			
+			}
