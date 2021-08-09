@@ -21,6 +21,15 @@ for(int m = 0; m <= 7; m++){One_wire_Tx_char = display_buffer[m]; UART_Tx_1_wire
 One_wire_Tx_char = cr_keypress;  UART_Tx_1_wire();
 
 
+#define Send_float_num_string \
+One_wire_Tx_char = 'B'; UART_Tx_1_wire();\
+for(int m = 0; m <= 7; m++){One_wire_Tx_char = display_buffer[m]; UART_Tx_1_wire();}\
+One_wire_Tx_char = cr_keypress;  UART_Tx_1_wire();
+
+
+
+
+
 
 #define Tx_clock_1     		200			//10K Baud rate				//92		//84		//100 		//142		//71	//80	//100
 #define Rx_clock_1     		200										//92	//84	//100		//142		//71	//80	//100
@@ -49,3 +58,16 @@ if (counter == 18)break;}
 
 
 #define PINC4_down  ((PINC & 0x10)^0x10)
+
+
+#define User_prompt_template \
+while(1){\
+do{sendString("f/i?    ");}	 while((isCharavailable(250) == 0));\
+User_response = receiveChar();\
+if((User_response == 'f') || (User_response == 'i'))break;} sendString("\r\n");
+
+
+
+
+
+
