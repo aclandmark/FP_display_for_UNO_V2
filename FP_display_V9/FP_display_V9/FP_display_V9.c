@@ -20,6 +20,8 @@ int main(void)
 	
 	char cal_factor;
 	char null_bit_counter;
+	char array_ptr;
+	
 	
 	CPU_CCP = 0xD8;
 	CLKCTRL_MCLKCTRLB = CLKCTRL_PDIV_8X_gc | 1;				//Generates 2MHz Peripheral clock
@@ -67,9 +69,12 @@ int main(void)
 	case 'B':													//If "cr" detected convert string from UNO to float
 	if(cr_keypress == 1){
 	cr_keypress = 0;
-	display_buffer2temp;
+	display_buffer2temp;										//EXTRACT the DECIMAL POINT
+	extract_dp;
+	
+	
+	
 	Float_Num_to_UNO = atof(temp_buffer);
-						
 	char_ptr = (char*)&Float_Num_to_UNO;						//Split the number into bytes ready for return to the UNO
 	for (int m = 0; m <= 3; m++)
 	{data_byte[m] = *char_ptr;
@@ -81,12 +86,15 @@ int main(void)
 	clear_display_buffer;
 	clear_temp_buffer;
 	ltoa(Long_Num_from_UNO, temp_buffer, 10);
-	temp2display_buffer;	
+	temp2display_buffer;										//Reverse string prior to display	
 	break;
 			
 	case 'D': 													//Convert float from UNO to string
 	Float_Num_from_UNO  = *float_ptr_2;
 	ftoaL(Float_Num_from_UNO);
+	Combine_dp;
+	Insert_sign;
+	temp2display_buffer;										//Reverse string prior to display
 	break;
 		
 	case 'E':													//Return binary number (long or float) to UNO
