@@ -47,6 +47,10 @@ volatile int data_byte_ptr;
 volatile float Float_Num_to_UNO, Float_Num_from_UNO;
 volatile char * char_ptr, * char_ptr_2;
 volatile float * float_ptr, *float_ptr_2;
+volatile char sign;
+
+
+
 
 #define display_buffer2temp \
 null_bit_counter = 0; \
@@ -62,6 +66,38 @@ for(int m = 0; m <= 14; m++)\
 {if(!(temp_buffer[14-m]))null_bit_counter += 1; else break;}\
 for(int m = 0; m <= 14-null_bit_counter; m++)\
 display_buffer[m] = temp_buffer[14-null_bit_counter - m];
+
+
+#define Combine_dp \
+array_ptr = 0;\
+for(int m = 0; m <= 14; m++)\
+{if (temp_buffer[m] != '.' )continue;\
+else array_ptr = m; break;}\
+if(array_ptr){\
+temp_buffer[array_ptr-1] |= 0x80;\
+for (int m = array_ptr; m <=13; m++)\
+temp_buffer[m] = temp_buffer[m+1];}
+
+
+#define extract_dp \
+array_ptr = 0;\
+for(int m = 0; m <= 14; m++)\
+{if (!(temp_buffer[m] & 0x80))continue;\
+	else temp_buffer[m] &= 0x7F;\
+array_ptr = m; break;}\
+if(array_ptr){\
+	for(int  m = 14; m >=array_ptr+2; m--)\
+	temp_buffer[m] = temp_buffer[m-1];\
+temp_buffer[array_ptr + 1] = '.';}
+
+#define Insert_sign \
+if (sign == '-'){\
+for(int  m = 14; m; m--){\
+temp_buffer[m] = temp_buffer[m - 1];}\
+temp_buffer[0] = '-';}
+
+
+
 
 
 #include "../Resources/One_wire_transactions.c"
