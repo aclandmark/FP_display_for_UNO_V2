@@ -3,12 +3,13 @@ void ftoaL(float);
 long longToStr(long, char*, int);
 void reverse(char *, int);
 float Local_Round_function(float, char);
+void Add_exponent (void);
 
 /***************************************************************************************************************************************/
 void ftoaL(float Fnum){
 	int afterpoint = 0;
 	long ipart, Fnum_int;
-	signed char expt;
+	
 	
 	sign = '+';
 	if (Fnum < 0){sign = '-'; Fnum *= (-1);}						 //Convert negative numbers to positive ones and set the sign character
@@ -81,3 +82,31 @@ float Local_Round_function(float num, char afterpoint){
 	inc = inc*0.55;												//Attempt to avoid trailing nines
 	num = num + inc;
 	return num;}
+
+
+void Add_exponent (void)
+{
+	char E_space;
+
+
+															//If there is an exponent overwrite the RH display digits
+	E_space = 2;												//with the Exponential notation
+	if (expt >= 10) E_space = 3;								//and leave the number at the left hand end of the display
+	if (expt <= -10)E_space = 4;
+	if ((expt < 0) && (expt > (-10)))E_space = 3;
+	
+	//for(int m = 0; m <= 15; m++)Non_exp_array[m] = array[m];	//Save array before overwriting with exponent
+	
+	switch (E_space){
+		case 2:	display_buffer[0] = expt + '0';display_buffer[1] = 'E';break;		//E1 to E9
+		case 3:	if (expt > 0)									//E10, E11, E12......etc
+		{display_buffer[0] = (expt%10) + '0';
+		display_buffer[1] = ((expt/10)%10) + '0';display_buffer[2] = 'E';}
+		if (expt < 0)											//E-1 to E-9
+		{display_buffer[0] = expt*(-1) + '0';
+		display_buffer[1] = '-';display_buffer[2] = 'E';}
+		break;
+		case 4:	display_buffer[0] = ((expt*(-1))%10) + '0';				//E-10, E-11, E-12....etc
+		display_buffer[1] = (((expt*(-1))/10)%10) + '0';
+		display_buffer[2] = '-';display_buffer[3] = 'E';
+		break;}}
