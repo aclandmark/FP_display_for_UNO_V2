@@ -89,7 +89,6 @@ if ((!(decimal_digit(keypress)))
 display_buffer[0] = keypress;
 break;}
 
-
 /*do
 {while (!(Serial.available())); 
 keypress = Serial.read();} 
