@@ -20,7 +20,7 @@ int main(void)
 	
 	char cal_factor;
 	char null_bit_counter;
-	char array_ptr;
+	int array_ptr;
 	
 	
 	CPU_CCP = 0xD8;
@@ -69,11 +69,10 @@ int main(void)
 	case 'B':													//If "cr" detected convert string from UNO to float
 	if(cr_keypress == 1){
 	cr_keypress = 0;
-	display_buffer2temp;										//EXTRACT the DECIMAL POINT
-	extract_dp;
-	
-	
-	
+	check_for_dp;
+	Add_dp_if_missing;											//FP arithmetic requires numbers with a dp
+	display_buffer2temp;										//Reverse string prior to conversion to a FPN
+	extract_dp;													//Display merges the dp with a digit  											
 	Float_Num_to_UNO = atof(temp_buffer);
 	char_ptr = (char*)&Float_Num_to_UNO;						//Split the number into bytes ready for return to the UNO
 	for (int m = 0; m <= 3; m++)
@@ -92,9 +91,12 @@ int main(void)
 	case 'D': 													//Convert float from UNO to string
 	Float_Num_from_UNO  = *float_ptr_2;
 	ftoaL(Float_Num_from_UNO);
-	Combine_dp;
+	Combine_dp;		 
 	Insert_sign;
+	Remove_lagging_zeros;
 	temp2display_buffer;										//Reverse string prior to display
+	if (expt){Left_justify_number;
+	Add_exponent ();}
 	break;
 		
 	case 'E':													//Return binary number (long or float) to UNO
