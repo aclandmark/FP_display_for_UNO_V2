@@ -48,7 +48,7 @@ volatile float Float_Num_to_UNO, Float_Num_from_UNO;
 volatile char * char_ptr, * char_ptr_2;
 volatile float * float_ptr, *float_ptr_2;
 volatile char sign;
-
+volatile signed char expt;
 
 
 
@@ -70,10 +70,12 @@ display_buffer[m] = temp_buffer[14-null_bit_counter - m];
 
 #define Combine_dp \
 array_ptr = 0;\
-for(int m = 0; m <= 14; m++)\
+if (temp_buffer[0] == '.'){temp_buffer[0] = '0' | 0x80;}\
+else\
+{for(int m = 0; m <= 14; m++)\
 {if (temp_buffer[m] != '.' )continue;\
 else array_ptr = m; break;}\
-if(array_ptr){\
+\
 temp_buffer[array_ptr-1] |= 0x80;\
 for (int m = array_ptr; m <=13; m++)\
 temp_buffer[m] = temp_buffer[m+1];}
@@ -83,12 +85,58 @@ temp_buffer[m] = temp_buffer[m+1];}
 array_ptr = 0;\
 for(int m = 0; m <= 14; m++)\
 {if (!(temp_buffer[m] & 0x80))continue;\
-	else temp_buffer[m] &= 0x7F;\
+else temp_buffer[m] &= 0x7F;\
 array_ptr = m; break;}\
-if(array_ptr){\
-	for(int  m = 14; m >=array_ptr+2; m--)\
-	temp_buffer[m] = temp_buffer[m-1];\
-temp_buffer[array_ptr + 1] = '.';}
+for(int  m = 14; m >=array_ptr+2; m--)\
+temp_buffer[m] = temp_buffer[m-1];\
+temp_buffer[array_ptr + 1] = '.';
+
+
+#define Remove_lagging_zeros \
+array_ptr = 14;\
+while ((temp_buffer[array_ptr] == 0) ||\
+(temp_buffer[array_ptr] == '0'))\
+{temp_buffer[array_ptr] = 0;\
+array_ptr -= 1;}
+
+
+#define Left_justify_number \
+while(1){array_ptr = 0;\
+for (int m = 14; m; m--)\
+display_buffer[m] = display_buffer[m - 1];\
+display_buffer[array_ptr++] = 0;\
+if (display_buffer[7]) break;}
+
+
+#define check_for_dp \
+array_ptr = 14;\
+while ((array_ptr)&&\
+(!(display_buffer[array_ptr] & 0x80)))\
+array_ptr -= 1;
+
+#define Add_dp_if_missing \
+if (!(array_ptr)){\
+array_ptr = 0;\
+for(int m = 0; m <= 14; m++)\
+{if((display_buffer[m] == 'E') ||\
+(display_buffer[m] == 'e'))array_ptr = m;}\
+if(array_ptr)\
+display_buffer[array_ptr + 1] |= 0x80;\
+\
+if (!(array_ptr))\
+{array_ptr = 14;\
+while ((array_ptr)&&\
+(!(display_buffer[array_ptr] & 0x80)))\
+array_ptr -= 1;\
+if (!(array_ptr))\
+display_buffer[0] |= 0x80;}}
+
+
+
+
+
+
+
 
 #define Insert_sign \
 if (sign == '-'){\
