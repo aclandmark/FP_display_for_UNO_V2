@@ -36,12 +36,12 @@ if (byte_counter == 5)												//Four bytes received
 			
 case 'D':															//Receive FPN binary number
 if (byte_counter == 1)												//First byte:set pointers
-{float_ptr_2 = &Float_Num_from_UNO;
-char_ptr_2 = (char*)&Float_Num_from_UNO;}							//Receive byte
+{float_ptr = &Float_Num_from_UNO;
+char_ptr = (char*)&Float_Num_from_UNO;}								//Receive byte
 Rx_symbol = Receive_data_byte();
-*char_ptr_2 = Rx_symbol;											//Save byte in FPN location
+*char_ptr = Rx_symbol;												//Save byte in FPN location
 byte_counter += 1;
-char_ptr_2 += 1;
+char_ptr += 1;
 if (byte_counter == 5)												//Four bytes received
 {transaction_complete = 1; byte_counter = 0;}break;
 			
@@ -53,6 +53,10 @@ if(byte_counter == 5)												//Four bytes transmitted
 {transaction_complete = 1; byte_counter = 0;
 data_byte_ptr = 0;}
 break;
+
+case 'F':CCP = 0xD8;WDT.CTRLA = 0x07;while(1);								//Watch dog reset
+break;
+
 		
 		}
 }
