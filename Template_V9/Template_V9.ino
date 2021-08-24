@@ -66,7 +66,8 @@ sendString("\r\nFuses:\tWDT, BOD, OSC,SYS0\tSYS1, APPEND, BOOTEND\r\n\t");
 read_out_fuses();
 
 UPDI_reset; 
-Dissable_UPDI_sesion;}
+Dissable_UPDI_sesion;
+}
 
 /*************************************************/
 
@@ -100,9 +101,9 @@ if (User_response =='f'){
  FPN = FPN * test;
 send_float_num(FPN);
   ftoaL(FPN, FP_string);
-for(int m = 0; m <=11; m++)if(FP_string[m])sendChar(FP_string[m]);
-  
-  }
+for(int m = 0; m <=11; m++)if(FP_string[m])sendChar(FP_string[m]); }
+
+if (User_response =='r'){One_wire_Tx_char = 'F'; UART_Tx_1_wire();}
 }}
 
 /**********************************End to test code section*********************************************/
