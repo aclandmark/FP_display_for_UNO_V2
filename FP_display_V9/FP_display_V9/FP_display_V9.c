@@ -7,8 +7,7 @@
 
 
 
-volatile char busy_flag;
-volatile char TCA0_counter;
+
 
 
 int main(void)
@@ -27,22 +26,15 @@ int main(void)
 	CPU_CCP = 0xD8;
 	CLKCTRL_OSC20MCALIBA = cal_factor;
 	
-	for(int m = 0; m <= 11; m++)display_buffer[m] = 0;		 
-	display_ptr = 0;
-	
+	//for(int m = 0; m <= 11; m++)display_buffer[m] = 0;		 
+	clear_display_buffer;
+	for(int m = 0; m <= 7; m++)display_buffer[m] = m + '0';
 	Set_display_ports;
 	   
    PORTC.DIR &= ~PIN3_bm;										//Configure comm port as input
    PORTC.OUT &= ~(PIN3_bm);										//I/O pin low when configured as output
    PORTC.PIN3CTRL |= PORT_PULLUPEN_bm;							//Pull-up enabled
-    
-   busy_flag = 0;												//Data procesing in progress: Do not poll UNO
-   data_byte_ptr = 0;											//Points to next FPN/long byte to be transfered to the UNO
-   cr_keypress = 0;												//Set to 1 when user presses carriage return 
-	byte_counter = 0;											//Counts bytes sent to or received from UNO
-	transaction_complete = 0;										//Set to 1 when a data transfer is complete
- transaction_type = 0;											//Data/string transfer to/from UNO 
-  TCA0_counter = 0;												//Counts TCAO interrupts
+      
    Start_TCA0();												//Display (2mS) tick rate
     
 	sei();
@@ -86,7 +78,7 @@ int main(void)
 	break;
 			
 	case 'D': 													//Convert float from UNO to string
-	Float_Num_from_UNO  = *float_ptr_2;
+	Float_Num_from_UNO  = *float_ptr;
 	ftoaL(Float_Num_from_UNO);
 	Combine_dp;		 
 	Insert_sign;
@@ -132,11 +124,11 @@ int main(void)
 
 /*****************************************************************************************************************************/
 	void Start_TCA0(void){
-	TCA0_counter = 0;
+	display_ptr = 0;
 	TCA0_SINGLE_CNT = 0;										//Initialise counter
 	TCA0_SINGLE_CMP0 = display_tick;							//2mS period for 2MHz clock
 	TCA0_SINGLE_CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc | 1;			//Start clock with 2MHz clock
-	TCA0_SINGLE_INTCTRL |= TCA_SINGLE_CMP0EN_bm;}				//Interrupt flag on compare match zero/*****************************************************************************************************************************/	void Display_driver(void){		clear_digits; clear_display;	switch(display_ptr){	case 0: digit_0; break;		case 1: digit_1; break;	case 2: digit_2; break;	case 3: digit_3; break;	case 4: digit_4; break;	case 5: digit_5; break;	case 6: digit_6; break;	case 7: digit_7; break;}	Char_definition();	display_ptr += 1; 	if(display_ptr == 8)display_ptr = 0;}				ISR (TCA0_CMP0_vect){											//Tx works but not Rx	TCA0_SINGLE_INTFLAGS |= TCA_SINGLE_CMP0EN_bm;	TCA0_counter += 1;	if (TCA0_counter <= 8)		{Display_driver();	inc_display_clock; return;}		cmp0_bkp = TCA0_SINGLE_CMP0 + display_tick;	inc_comms_clock;	PORTC.DIR |= PIN3_bm;										//Output low: Start bit	if (!(busy_flag))comms_transaction();	TCA0_SINGLE_CMP0 = cmp0_bkp;	TCA0_counter = 0;}										void Char_definition()
+	TCA0_SINGLE_INTCTRL |= TCA_SINGLE_CMP0EN_bm;}				//Interrupt flag on compare match/*****************************************************************************************************************************/	void Display_driver(void){		clear_digits; clear_display;	switch(display_ptr){	case 0: digit_0; break;		case 1: digit_1; break;	case 2: digit_2; break;	case 3: digit_3; break;	case 4: digit_4; break;	case 5: digit_5; break;	case 6: digit_6; break;	case 7: digit_7; break;}	Char_definition();}							ISR (TCA0_CMP0_vect){			TCA0_SINGLE_INTFLAGS |= TCA_SINGLE_CMP0EN_bm;				//Clear the interrupt flag			if(display_ptr <= 7)				{Display_driver();			if(display_ptr < 7){inc_display_clock;}			else TCA0_SINGLE_CMP0 += 1800;			display_ptr += 1;			return;}						display_ptr += 1;						cmp0_bkp = TCA0_SINGLE_CMP0 + 2200;			if (!(busy_flag)){inc_comms_clock;			PORTC.DIR |= PIN3_bm;comms_transaction();}			TCA0_SINGLE_CMP0 = cmp0_bkp;		display_ptr = 0;}						/*		ISR (TCA0_CMP0_vect){			TCA0_SINGLE_INTFLAGS |= TCA_SINGLE_CMP0EN_bm;				//Clear the interrupt flag			TCA0_counter += 1;											//			if(TCA0_counter <= 8)			{Display_driver();				if(TCA0_counter <= 7){inc_display_clock;}				else TCA0_SINGLE_CMP0 += 1800;			return;}			cmp0_bkp = TCA0_SINGLE_CMP0 + 2200;			if (!(busy_flag)){inc_comms_clock;			PORTC.DIR |= PIN3_bm;comms_transaction();}			TCA0_SINGLE_CMP0 = cmp0_bkp;		TCA0_counter = 0;}		*/												void Char_definition()
 		{switch (display_buffer[display_ptr]){
 			case '0': zero; break;
 			case '1': one; break;
