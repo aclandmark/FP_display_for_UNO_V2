@@ -8,8 +8,8 @@
 #include <util/delay.h>
 #include <stdlib.h>
 
-#define display_tick	4000	//2mS assuming a clock of 2.22MHz (OSCM20 generates 17.76MHz instead of 16MHz)	
-#define comms_tick		200	//111		//500mS per transaction
+#define display_tick	4000	//4000 2mS assuming a clock of 2.22MHz (OSCM20 generates 17.76MHz instead of 16MHz)	
+#define comms_tick		200	//111		//1mS per transaction
 #define half_comms_tick	100	//55		
 
 #define wait_for_clock_tick \while (!(TCA0_SINGLE_INTFLAGS & TCA_SINGLE_CMP0EN_bm));\TCA0_SINGLE_INTFLAGS |= TCA_SINGLE_CMP0EN_bm;
@@ -29,29 +29,33 @@ char Receive_data_byte (void);
 void Char_definition(void);
 
 volatile char Tx_symbol, Rx_symbol, Rx_symbol_bkp;
-volatile char transaction_type, transaction_complete;
-volatile int byte_counter;
+volatile char transaction_type = 0;							//Data/string transfer to/from UNO
+volatile char transaction_complete = 0;						//Set to 1 when a data transfer is complete
+volatile int byte_counter = 0;								//Counts bytes sent to or received from UNO
 
 volatile int cmp0_bkp;
 volatile char cal_factor;
 volatile char test_symbol= 1;
 char data[10];
 
-char display_buffer[15];		//12
-char temp_buffer[15];		//8
-volatile int display_ptr;
-volatile long Long_Num_from_UNO, Long_Num_to_UNO;
-volatile char cr_keypress;
-unsigned char data_byte[4];
-volatile int data_byte_ptr;
-volatile float Float_Num_to_UNO, Float_Num_from_UNO;
-volatile char * char_ptr, * char_ptr_2;
-volatile float * float_ptr, *float_ptr_2;
-volatile char sign;
-volatile signed char expt;
+char display_buffer[15];
+char temp_buffer[15];	
+volatile int display_ptr;								//Points to next digit to be driven
+long Long_Num_from_UNO, Long_Num_to_UNO;
+float Float_Num_to_UNO, Float_Num_from_UNO;
+char cr_keypress = 0;									//Set to 1 when user presses carriage return
+unsigned char data_byte[4];								//32 bit numbers are split into 4 bytes for transmission
+volatile int data_byte_ptr = 0;							//Points to next FPN/long byte to be transfered to the UNO
 
+char * char_ptr;										//Used to convert float to four separate bytes
+float * float_ptr;
+char sign;
+signed char expt;
 
-
+volatile char busy_flag = 0;							//Data processing in progress: Do not poll UNO
+//volatile int TCA0_counter = 0;							//Counts TCAO interrupts;
+ 
+ 
 #define display_buffer2temp \
 null_bit_counter = 0; \
 clear_temp_buffer;\
@@ -130,12 +134,6 @@ while ((array_ptr)&&\
 array_ptr -= 1;\
 if (!(array_ptr))\
 display_buffer[0] |= 0x80;}}
-
-
-
-
-
-
 
 
 #define Insert_sign \
