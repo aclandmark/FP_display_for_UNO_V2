@@ -62,9 +62,9 @@ if (counter == 18)break;}
 
 #define User_prompt_template \
 while(1){\
-do{sendString("f/i?    ");}	 while((isCharavailable(250) == 0));\
+do{sendString("f/i/r?    ");}	 while((isCharavailable(250) == 0));\
 User_response = receiveChar();\
-if((User_response == 'f') || (User_response == 'i'))break;} sendString("\r\n");
+if((User_response == 'f') || (User_response == 'i') || (User_response == 'r'))break;} sendString("\r\n");
 
 
 
