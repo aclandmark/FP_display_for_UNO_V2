@@ -38,7 +38,7 @@ sendHex (16,print_line); sendString("   ");
 
 
 
-while(1){ if(!(prog_counter_mem))break;							//print out loop starts here, exit when finished
+while(1){ if(!(prog_counter_mem))break;								//print out loop starts here, exit when finished
 
 FFFF_counter = 0;  
 while(1) {															//Start reading the flash memory searching for the next hex command
