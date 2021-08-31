@@ -10,6 +10,18 @@ if((unsigned char)Rx_symbol == 0xFF)return;							//No response from UNO
 if (!(byte_counter))												//Response from UNO initiates new transaction
 {byte_counter = 1;													
 transaction_type = Rx_symbol;										//First symbol received defines transaction type
+
+if(transaction_type == 'F')
+{CCP = 0xD8; WDT.CTRLA = 3;	while(1);}								//32mS watch dog period
+
+if(transaction_type == 'G'){
+if(brightness_control == 3500)brightness_control = 500;
+else brightness_control = 3500;
+transaction_complete = 1;
+byte_counter = 0;
+
+}
+
 return;}}
 	
 	
@@ -54,11 +66,12 @@ if(byte_counter == 5)												//Four bytes transmitted
 data_byte_ptr = 0;}
 break;
 
-case 'F':CCP = 0xD8;WDT.CTRLA = 0x07;while(1);								//Watch dog reset
-break;
+//case 'G':
+//transaction_complete = 1; break;
 
-		
-		}
+
+
+}
 }
 
 
@@ -78,11 +91,7 @@ char Receive_data_byte (void){
 		inc_comms_clock;}		wait_for_clock_tick;
 	PORTC.DIR &= ~PIN3_bm;}
 	
-		
-		
-		
-		
-		
+	
 		
 		
 		
