@@ -31,7 +31,7 @@ switch (counter){
 case 0x0:   break;													//Detect -:- at start of new line
 case 0x1:   tempInt1 = Rx_Hex_char<<4;  break;						//Acquire first digit 
 case 0x2:   tempInt1 += Rx_Hex_char;								//Acquire second digit and combine with first to obtain number of commands in line
-      char_count = 9 + ((tempInt1) *2);							//Calculate line length in terms of individual characters
+      char_count = 9 + ((tempInt1) *2);								//Calculate line length in terms of individual characters
       local_pointer = w_pointer++;									//Update pointer to array "store"
       store[local_pointer] = tempInt1; break;						//Save the number of commands in the line to the array  
 case 0x3:   tempInt1 = Rx_Hex_char<<4;  break;						//Next 4 digits give the address of the first command in the line
@@ -45,7 +45,7 @@ case 0x7:   break;													//chars 7 and 8 are not used
 case 0x8:   break;
 default:  break;}
 
-if ((counter > 8)&&(counter < char_count)){						//Continue to acquire, decode and store commands
+if ((counter > 8)&&(counter < char_count)){							//Continue to acquire, decode and store commands
 if ((counter & 0x03) == 0x01){tempInt1 = Rx_Hex_char<<4;}			//Note: Final two chars at the end of every line are ignored
 if ((counter & 0x03) == 0x02)  {tempInt1 += Rx_Hex_char;}
 if ((counter & 0x03) == 0x03)  {tempInt2 = Rx_Hex_char<<4;}
@@ -84,7 +84,7 @@ if (record_length==0)break;											//Escape when end of hex file is reached
 switch(short_record){
 case 0: if (space_on_page == (PageSZ - line_offset))				//If starting new page
       {page_address = (Hex_address & PAmask);						//get new page address
-      if(!(Hex_address%PageSZ))									//Start of new record is also start of new page
+      if(!(Hex_address%PageSZ))										//Start of new record is also start of new page
 	  {inititalise_UPDI_cmd_write(page_address);					//Re-initialise UPDI for pages that start at the beginning of a record
 	  	  }}break;
 
@@ -95,7 +95,7 @@ Program_record();}
 
 
 
-cli();UCSR0B &= (~(1<<RXCIE0));									//download complete, disable UART Rx interrupt
+cli();UCSR0B &= (~(1<<RXCIE0));										//download complete, disable UART Rx interrupt
 
 while(1){if (isCharavailable(10)==1){receiveChar();}				//Clear last few characters of hex file
     else break;}
@@ -116,7 +116,7 @@ if ((add_last_cmd + 1)%PageSZ){orphan = 1;}}
 if(record_type_old)													//Hex file cotains discontinity	and records can span two pages											
 { 	
 
-if((!(Flash_flag)) && (orphan))									//Nothing to save to flash. The last record is a short one.
+if((!(Flash_flag)) && (orphan))										//Nothing to save to flash. The last record is a short one.
 {break_page_fill;}													//Exit UPDI repeat comand early since there is no data to occupy a page
 
 
@@ -131,7 +131,7 @@ write_page_SUB(page_address);}}										//Last line only occupies 1 page
 
 
 
-if(!(record_type_old)){											//Hex file has no discontinuities 
+if(!(record_type_old)){												//Hex file has no discontinuities 
 if(Flash_flag) {													//Hex file ends mid-page
 break_page_fill;													//Exit proramming early
 write_page_SUB(page_address);}										//Store page to flash									
