@@ -74,7 +74,7 @@ UART_Tx(LCDS | ASI_SYS_STATUS_reg);     			//Test lockstatus, bit 0 of SYS_STATU
 Rx_Byte = UART_Rx();
 test += 1;
 if(UPDI_timeout)break;
-}while(!(Rx_Byte & 0x08));                 		//Exit when lock status bit is zero
+}while(!(Rx_Byte & 0x08));                 			//Exit when lock status bit is zero
 cli();
 
 if (UPDI_timeout) 
@@ -109,6 +109,7 @@ UART_Tx(start_add++);
 UART_Tx(start_add >> 8);
 sendHex(16, UART_Rx());
 Timer_T0_sub(T0_delay_200us);}}
+
 
 
 
