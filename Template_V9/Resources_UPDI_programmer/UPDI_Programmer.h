@@ -137,12 +137,13 @@ unsigned char SIB_byte[24], Rx_Byte;
 int test = 0;
 volatile char UPDI_timeout = 0;
 volatile unsigned char SREG_BKP;
-volatile int P_counter;
+volatile int P_counter = 0;	 												//Used to check parity of data received from UPDI
 
 unsigned char data_byte_Tx, data_byte_Rx;
 unsigned char Rx_bit, Tx_bit;
 unsigned char parity_2;
 
+char mode = 0;
 
 /*************************************************************************/
 
@@ -194,7 +195,7 @@ unsigned char space_on_page;									//Keeps a track of the space remaining on a
 unsigned char Flash_flag;									//Indicates that the page buffer contains commands
 
 signed char record_length;									//Num commands one one line of hex file (i.e. on one record)
-volatile signed char record_length_old;								//If record length changes, length of the previous one is important
+volatile signed char record_length_old;						//If record length changes, length of the previous one is important
 volatile signed char odd_line_length;
 volatile unsigned int add_last_cmd;
 signed char orphan;											//Indicates that the contents of a record span two flash pages
@@ -209,6 +210,7 @@ char User_response;
 volatile char T1OVFM = 0;
 
 
+
 /************************************************************************************************************************************/
 #define setup_328_HW \
 \
@@ -217,7 +219,7 @@ ADMUX |= (1 << REFS0);\
 initialise_IO;\
 \
 USART_init(0,68);\
-set_flash_sz;
+FlashSZ = 0x2000;
 
 
 
@@ -233,6 +235,8 @@ WDTCSR = 0;
 
 
 #define SW_reset {wdt_enable(WDTO_30MS);while(1);}
+
+
 
 
 
@@ -354,9 +358,9 @@ if (set_up_NVM_prog())\
 sendString("\r\nSignature byte readout\t\t");\
 else {sendString("\r\nPOR to proceed!"); while(1);}\
 read_out_signature_bytes();\
-sendString("\r\nCalibration byte readout\t\t");\
-read_out_calibration_bytes();\
 newline();
+
+
 
 
 
