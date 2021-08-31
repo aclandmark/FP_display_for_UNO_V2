@@ -12,3 +12,4 @@
 #include "Resources_UPDI_programmer\Hex_Programmer.c"
 #include "Resources_UPDI_programmer\UPDI_subroutines.c"
 #include "Resources_UPDI_programmer\verify_flash.c"
+#include "Resources_UPDI_programmer\Programmer_UART_subroutines.c"
