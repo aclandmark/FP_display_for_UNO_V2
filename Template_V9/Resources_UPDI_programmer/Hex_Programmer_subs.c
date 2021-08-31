@@ -60,7 +60,7 @@ Hex_address  =  (store[Local_r_pointer]); 								//Get the address of the first
 inc_r_pointer;  														//Increment the read pointer
 Hex_address  = Hex_address/2;											//Convert address from byte to word value
 
-add_last_cmd = Hex_address + (record_length/2) - 1;					//addresss of last command in the record						
+add_last_cmd = Hex_address + (record_length/2) - 1;						//addresss of last command in the record						
 
 record_type_old = record_type;
 if(Hex_address%half_SRL) record_type = 1;								//Record may span two pages 
