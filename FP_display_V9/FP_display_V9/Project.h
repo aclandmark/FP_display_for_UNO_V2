@@ -8,9 +8,9 @@
 #include <util/delay.h>
 #include <stdlib.h>
 
-#define display_tick	4000	//4000 2mS assuming a clock of 2.22MHz (OSCM20 generates 17.76MHz instead of 16MHz)	
-#define comms_tick		200	//111		//1mS per transaction
-#define half_comms_tick	100	//55		
+#define display_tick	4000							//4000 2mS assuming a clock of 2MHz
+#define comms_tick		200								//1mS per transaction of 10 bits
+#define half_comms_tick	100		
 
 #define wait_for_clock_tick \while (!(TCA0_SINGLE_INTFLAGS & TCA_SINGLE_CMP0EN_bm));\TCA0_SINGLE_INTFLAGS |= TCA_SINGLE_CMP0EN_bm;
 
@@ -19,24 +19,22 @@
 #define inc_half_comms_clock		TCA0_SINGLE_CMP0 += half_comms_tick;
 
 
-void Start_TCA0(void);
-void UART_transaction(void);
-void comms_transaction(void);
-
-void Display_driver(void);
-void Transmit_data_byte (char);
+void Start_TCA0(void);									//Timer used to control display/comms multiplexing 
+void Start_TCB0(int);									//Used to control display intensity
+void Display_driver(void);								//Display multiplexer
+void Char_definition(void);								//Defines a digit in terms of its segments
+void comms_transaction(void);							//Transfer data or string
+void Transmit_data_byte (char);							//Tx/Rx FW modules which communicate with UNO
 char Receive_data_byte (void);
-void Char_definition(void);
+
+
 
 volatile char Tx_symbol, Rx_symbol, Rx_symbol_bkp;
-volatile char transaction_type = 0;							//Data/string transfer to/from UNO
-volatile char transaction_complete = 0;						//Set to 1 when a data transfer is complete
-volatile int byte_counter = 0;								//Counts bytes sent to or received from UNO
+volatile char transaction_type = 0;						//Data/string transfer to/from UNO
+volatile char transaction_complete = 0;					//Set to 1 when a data transfer is complete
+volatile int byte_counter = 0;							//Counts bytes sent to or received from UNO
 
-volatile int cmp0_bkp;
-volatile char cal_factor;
-volatile char test_symbol= 1;
-char data[10];
+volatile int cmp0_bkp;									//Used to merge comms transaction and display multiplexer
 
 char display_buffer[15];
 char temp_buffer[15];	
@@ -53,7 +51,8 @@ char sign;
 signed char expt;
 
 volatile char busy_flag = 0;							//Data processing in progress: Do not poll UNO
-//volatile int TCA0_counter = 0;							//Counts TCAO interrupts;
+//int brightness_control = 500;
+ int brightness_control;
  
  
 #define display_buffer2temp \
