@@ -8,6 +8,8 @@ volatile char One_wire_mode;
 
 
 
+
+/*************************************************************************************************************/
 void send_int_num(long num){
 One_wire_Tx_char = 'C'; 								//Command 'C' indicates the a long number will be sent
 UART_Tx_1_wire();
@@ -17,6 +19,8 @@ UART_Tx_1_wire();}}										//and send them individually
 
 
 
+
+/*************************************************************************************************************/
 void send_float_num(float FP_num){
 char * Char_ptr;
 Char_ptr = (char*)&FP_num;
@@ -31,8 +35,7 @@ Char_ptr += 1;}}
 	
 
 
-
-
+/*************************************************************************************************************/
 void UART_Tx_1_wire(void){
 One_wire_Rx_char = 0;
 Tx_complete = 0;
@@ -44,6 +47,8 @@ while(!(Tx_complete));								//Wait here untill transmisson is complete
 cli();}
 
 
+
+/*************************************************************************************************************/
 void UART_Rx_1_wire(void){
 One_wire_Rx_char = 0;
 Rx_complete = 0;
@@ -55,7 +60,8 @@ while (!(Rx_complete));
 cli();}
 
 
-/****************************************************************/
+
+/*************************************************************************************************************/
 ISR(PCINT1_vect){                                   //Detect low on PINC4
 if(PINC4_down){										//If start bit:
 
