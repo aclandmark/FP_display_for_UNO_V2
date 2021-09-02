@@ -14,6 +14,7 @@ char display_buffer[12], buffptr = 0;
 volatile char cr_keypress;
 
 
+
 #define Send_int_num_string \
 One_wire_Tx_char = 'A'; UART_Tx_1_wire();\
 for(int m = 0; m <= 7; m++){One_wire_Tx_char = display_buffer[m]; UART_Tx_1_wire();}\
@@ -31,10 +32,12 @@ One_wire_Tx_char = cr_keypress;  UART_Tx_1_wire();
 #define Start_clock_1    	TCNT0 = 0;  TCCR0B = (1 << CS01);
 #define Half_Rx_clock_1 	100		
 
+
 #define wait_for_comms_tick \
 OCR0A +=  Rx_clock_1;\
 while (!(TIFR0 & (1 << OCF0A)));\
 TIFR0 = 0xFF;
+
 
 #define wait_for_half_comms_tick \
 OCR0A =  Half_Rx_clock_1;\
