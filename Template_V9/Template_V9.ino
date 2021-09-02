@@ -1,8 +1,10 @@
 
 
 
-#include "Resources_Template_V9.h"
-#include "Resources_UPDI_programmer.h"
+#include "Resources_Template_V9.h"                              //Contains resources used by template and shared with programmer
+//#include "Resources_UPDI_programmer.h"                          //Only contains resources used by the programmer
+
+
 
 /*
  * Programmer uses PC0 which is initialsed to Hi-Z input
@@ -22,10 +24,9 @@ char FP_string[12];
 setup_328_HW;                                           //see "Resources\ATMEGA_Programmer
 
 
-/************************Programmer code starts here and can be removed************************************/
+/************************Programmer code starts here and can be removed************************************
+FlashSZ = 0x2000;                                      //Amount of flash availale in ATtiny 1606
 User_prompt;
-
-
 
 sendString("\r\nPress 'a' to program target or AOK to run taget code\r\n\r\n");
 if(waitforkeypress() == 'a'){
@@ -46,16 +47,16 @@ initialise_NVM_programming;
 sendString("Programming fuses\r\n");
 write_fuse (WDTCFG, 0x0);                             //Default value: WDT under program control
 write_fuse (BODCFG,0x0);                              //Default value: BOD dissabled
-write_fuse (OSCCFG, 0x01);                            //Default value: 16MHz internal clock  0x7D
+write_fuse (OSCCFG, 0x01);                            //select the 16MHz internal clock with factory cal
 write_fuse (SYSCFG0, 0xF7);                           //UPDI enabled, EEPROM preserved at chip erase
 write_fuse (SYSCFG1, 0xFD);                           //16mS SUT
-write_fuse (APPEND, 0);
-write_fuse (BOOTEND, 0);
+write_fuse (APPEND, 0);                               //No area of flash is partitioned off 
+write_fuse (BOOTEND, 0);                              //for data or a bootloader
 
 
 sendString("\r\nProgram flash with hex? -y- or AOK");
 if (waitforkeypress() == 'y')
-{ mode = 'H';
+{ mode = 'H';                                         //Text mode is not included in this version of the programmer
 sendString("\r\nSend file  ");
 Program_Flash_Hex();}
 
@@ -76,7 +77,7 @@ Dissable_UPDI_sesion;}
 sendString("\r\n\r\nRun trial application? -y- or AOK (POR may be required)\r\n\r\n");
 if(waitforkeypress() == 'y'){
 
-/************************Programmmer code ends here*******************************************************************/
+************************Programmmer code ends here*******************************************************************/
 
 
 PCICR |= (1 << PCIE1); PCMSK1 |= (1 << PCINT11);                            //Set up PCI for SM switch
@@ -107,7 +108,7 @@ if (User_response =='f'){
  FPN = FPN * 2.75;                                                          //Simple arithmetic to check operation of binary/string conversions
 send_float_num(FPN);}}
 
-}       //Only required if programmer code is included
+//}                                                                           //Only required if programmer code is included
 /**********************************End to test code section*********************************************/
 SW_reset;
 return 1;}
