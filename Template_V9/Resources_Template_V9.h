@@ -9,3 +9,5 @@
 #include "Resources_Template_V9\Resources_Template_V9.h"
 #include "Resources_Template_V9\One_wire_transactions.c"
 #include "Resources_Template_V9\ASKII_subroutines.c"
+#include "Resources_Template_V9\Resources_shared.h"
+#include "Resources_Template_V9\Resources_shared.c"
