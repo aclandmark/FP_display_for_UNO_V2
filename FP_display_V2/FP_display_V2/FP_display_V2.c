@@ -1,13 +1,11 @@
 /*
- 
+Program runs on Attiny1606
+and is compiled using default Studio 7 compiler settings
  */ 
 
 
 #include "Project.h"
 int mag(int);
-
-
-
 
 
 int main(void){
@@ -25,7 +23,7 @@ int main(void){
 	CLKCTRL_OSC20MCALIBA = cal_factor;
 	
 	brightness_control = 500;									//Selects low brightness at reset
-				 
+	
 	clear_display_buffer;										//Generate test display
 	for(int m = 0; m <= 7; m++)									//Display 75311357 on reset:  Confirms that display is working correctly
 	display_buffer[m] = mag(7 - (2*m)) + '0';
@@ -45,7 +43,7 @@ int main(void){
 		
 	switch (transaction_type){									//Transaction complete: Process the data
 		
-	case 'A':													//If "cr" detected convert string from UNO to long number
+	case 'A':													//When "cr" detected convert string from UNO to long number
 	if(cr_keypress == 1){
 	cr_keypress = 0;
 	display_buffer2temp;										//Reverse string prior to conversion to binary
@@ -54,7 +52,7 @@ int main(void){
 	data_byte[m] = Long_Num_to_UNO >> (8*(3-m));}				//Split long number into 4 bytes for re-transmission
 	break;
 		
-	case 'B':													//If "cr" detected convert string from UNO to float
+	case 'B':													//When "cr" detected convert string from UNO to float
 	if(cr_keypress == 1){
 	cr_keypress = 0;
 	check_for_dp;
@@ -96,7 +94,7 @@ int main(void){
 	display_buffer[m] = temp_buffer[m];
 	break;
 	
-	case 'G': break;
+	case 'G': break;											//Toggles brightness
 	
 	}
 		
@@ -107,7 +105,7 @@ int main(void){
 
 
 /*****************************************************************************************************************************/
-	void Start_TCA0(void){
+	void Start_TCA0(void){										//Clock that controls display and FW comms port
 	display_ptr = 0;
 	TCA0_SINGLE_CNT = 0;										//Initialise counter
 	TCA0_SINGLE_CMP0 = display_tick;							//2mS period for 2MHz clock
