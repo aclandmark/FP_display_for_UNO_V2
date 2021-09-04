@@ -26,7 +26,7 @@ char op;                                                //+, -, *, /, pow
 setup_328_HW;                                           //see "Resources\ATMEGA_Programmer
 
 
-/************************Programmer code starts here and can be removed************************************
+/************************Programmer code starts here and can be removed************************************/
 FlashSZ = 0x2000;                                      //Amount of flash availale in ATtiny 1606
 User_prompt;
 
@@ -34,7 +34,7 @@ sendString("\r\nPress 'a' to program target or AOK to run taget code");
 if(waitforkeypress() == 'a'){
 
 //********************************Programmer target connection sequence************************************
-Timer_T1_sub_with_interrupt(T1_delay_100ms);
+Timer_T1_sub_with_interrupt(T1_delay_100ms);          //Generates a timeout if contact with the target fails
 sei();
 contact_target;
 configure_updi;                                       //Increases UPDI clock to 16MHz and reduce guard band to 2 cycles
@@ -79,7 +79,7 @@ Dissable_UPDI_sesion;}
 sendString("\r\n\r\nRun trial application? -y- or AOK (POR may be required)\r\n\r\n");
 if(waitforkeypress() == 'y'){
 
-************************Programmmer code ends here*******************************************************************/
+/************************Programmmer code ends here*******************************************************************/
 
 
 PCICR |= (1 << PCIE1); PCMSK1 |= (1 << PCINT11);          //Set up PCI for SM switch
@@ -127,7 +127,7 @@ send_float_num(FPN_1);
 sei();                                                  //Required for intensity control
 }}}
 
-//}                                                     //Only required if programmer code is included
+}                                                     //Only required if programmer code is included
 /**********************************End to test code section*********************************************/
 SW_reset;
 return 1;}
