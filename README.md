@@ -16,3 +16,9 @@ One for a simplex firmare UART used to communicate with the UNO
 
 
 The ATtiny1608 has a UPDI programming interface and programming will be carried out using the "UNO as UPDI programmer" sketch.
+
+
+Link to AVRfreaks posting:
+
+
+https://github.com/MicrochipTech/avrfreaks-projects/tree/main/projects/fpdisplayforunov2
